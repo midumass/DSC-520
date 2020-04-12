@@ -1,0 +1,136 @@
+---
+title: "Assignment 4.1 Hill, Zach"
+author: "Zach Hill"
+date: "05APR2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, echo = FALSE, results = 'hide', message = FALSE}
+library(rmarkdown)
+library(knitr)
+library(ggplot2)
+library(readr)
+library(pastecs)
+library(psych) 
+library(grid)
+library(gridExtra)
+exams <- read_tsv('Exams.dat')
+exams$uni <- factor(exams$uni, levels = c(0:2), labels = c("George", "Jeff", "Tushmann"))
+```
+
+# Desciptive Statistics
+
+
+```{r describe, echo = FALSE}
+options(digits = 2)
+stat.desc(exams[1:5], basic = FALSE)
+by(exams[1:5], exams$uni, stat.desc, basic = FALSE)
+```
+
+
+```{r subsets, echo = FALSE}
+georgeData <- subset(exams, exams$uni == "George")
+jeffData <- subset(exams, exams$uni == "Jeff")
+tushmannData <- subset(exams, exams$uni == "Tushmann")
+```
+
+## Professor George
+
+Professor George's class tends towards lower scores in the exam and on numeracy as shown below.
+
+```{r george, echo=FALSE, fig.width = 8, fig.height = 3, fig.show = 'hold', fig.align = 'center'}
+ggplot(georgeData, aes(exam)) +
+  geom_histogram(aes(y = ..density.., fill = uni), binwidth = 5) +
+  stat_function(fun = dnorm, args = list(mean = mean(exams$exam), sd = sd(exams$exam)), colour = "black", size =1) -> fig1
+
+ggplot(georgeData, aes(numeracy)) +
+  geom_histogram(aes(y = ..density.., fill = uni), binwidth = 3) +
+  stat_function(fun = dnorm, args = list(mean = mean(exams$numeracy), sd = sd(exams$numeracy)), colour = "black", size =1) -> fig2
+
+grid.arrange(fig1, fig2, ncol = 2)
+```
+
+We can see that Professor Georges students' median scores were below the mean, skewing the histograms right. 
+
+## Professor Jeff
+
+Professor Jeff's class tends towards higher scores in the exam and on computer assessments as shown below.
+
+```{r jeff, echo=FALSE, fig.width = 8, fig.height = 3, fig.show = 'hold', fig.align = 'center'}
+ggplot(jeffData, aes(exam)) +
+  geom_histogram(aes(y = ..density.., fill = uni), binwidth = 5) +
+  stat_function(fun = dnorm, args = list(mean = mean(exams$exam), sd = sd(exams$exam)), colour = "black", size =1) -> fig3
+
+ggplot(jeffData, aes(computer)) +
+  geom_histogram(aes(y = ..density.., fill = uni), binwidth = 3) +
+  stat_function(fun = dnorm, args = list(mean = mean(exams$computer), sd = sd(exams$computer)), colour = "black", size =1) -> fig4
+
+grid.arrange(fig3, fig4, ncol = 2)
+```
+
+We can see here Professor Jeff's students' median scores were above the overall mean skewing the histograms left.
+
+## Professor Tushmann
+
+Professor Tushmann's class tends towards higher scores in the exam and on computer assessments as shown below.
+
+```{r tushmann, echo=FALSE, fig.width = 8, fig.height = 3, fig.show = 'hold', fig.align = 'center'}
+ggplot(tushmannData, aes(exam)) +
+  geom_histogram(aes(y = ..density.., fill = uni), binwidth = 5) +
+  stat_function(fun = dnorm, args = list(mean = mean(exams$exam), sd = sd(exams$exam)), colour = "black", size =1) -> fig3
+
+ggplot(tushmannData, aes(computer)) +
+  geom_histogram(aes(y = ..density.., fill = uni), binwidth = 3) +
+  stat_function(fun = dnorm, args = list(mean = mean(exams$computer), sd = sd(exams$computer)), colour = "black", size =1) -> fig4
+
+grid.arrange(fig3, fig4, ncol = 2)
+```
+
+We can see here Professor Tushmann's students' median scores were below the overall mean skewing the histograms right.
+
+## Shapiro-Wilk test
+
+As we can see, most of the samples are not normally distributed as indicated by the sub-.05 p-value with the exception of the computer assessment
+
+```{r, echo = FALSE}
+shapiro.test(exams$exam)
+shapiro.test(exams$computer)
+shapiro.test(exams$lectures)
+shapiro.test(exams$numeracy)
+shapiro.test(exams$stats)
+```
+
+## Shapiro-Wilk test by professor
+
+Most sample distributions appear normal with the exception of the stats and numeracy, and Professor Jeff's computer assessments
+```{r, echo = FALSE, results = 'hide'}
+by(exams$exam, exams$uni, shapiro.test)
+```
+
+
+
+Normalcy of computer assessments
+```{r, echo = FALSE}
+by(exams$computer, exams$uni, shapiro.test)
+ggplot(exams, aes(sample = exams$computer, position = 'jitter'), width = 3, height = 3) + stat_qq()
+```
+
+Professor Jeff's students shows significant results with a .02 p-value
+
+```{r, echo = FALSE, results = 'hide'}
+by(exams$lectures, exams$uni, shapiro.test)
+```
+
+
+
+```{r, echo = FALSE}
+by(exams$numeracy, exams$uni, shapiro.test)
+ggplot(exams, aes(sample = exams$numeracy, position = 'jitter'), width = 3, height = 3) + stat_qq()
+```
+
+```{r, echo = FALSE}
+by(exams$stats, exams$uni, shapiro.test)
+ggplot(exams, aes(sample = exams$stats, position = 'jitter'), width = 3, height = 3) + stat_qq()
+```
