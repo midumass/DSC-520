@@ -1,0 +1,89 @@
+---
+title: "Assignment_9.2_HillZach"
+author: "Zach Hill"
+date: "May 12, 2019"
+output: pdf_document
+---
+
+```{r setup, warning=FALSE, echo=FALSE, results='hide', message=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(readr)
+library(class)
+library(gmodels)
+library(grid)
+library(gridExtra)
+library(factoextra)
+
+input_file <- './clustering-data.csv'
+
+data <- read_csv(input_file)
+
+set.seed(1978)
+```
+
+## A: Plotted data from original datasets
+
+```{r fig.width = 10, fig.height = 4, echo = FALSE}
+data_plot <- ggplot(data, aes(x = x, y = y)) +
+  geom_point(alpha = '.25') +
+  ggtitle("Clustering Data Plot")
+
+data_plot
+```
+Why, hello there Mario. How is World 1-1 treating you?
+
+## B: Fitting the dataset using kmeans
+
+```{r echo=FALSE, fig.asp=.65}
+k_function <- function(x){kmeans(data, centers = x)}
+
+k2 <- k_function(2)
+k3 <- k_function(3)
+k4 <- k_function(4)
+k5 <- k_function(5)
+k6 <- k_function(6)
+k7 <- k_function(7)
+k8 <- k_function(8)
+k9 <- k_function(9)
+k10 <- k_function(10)
+k11 <- k_function(11)
+k12 <- k_function(12)
+
+p2 = fviz_cluster(k2, geom = "point", data = data) + ggtitle('k=2')
+p3 = fviz_cluster(k3, geom = "point", data = data) + ggtitle('k=3')
+p4 = fviz_cluster(k4, geom = "point", data = data) + ggtitle('k=4')
+p5 = fviz_cluster(k5, geom = "point", data = data) + ggtitle('k=5')
+p6 = fviz_cluster(k6, geom = "point", data = data) + ggtitle('k=6')
+p7 = fviz_cluster(k7, geom = "point", data = data) + ggtitle('k=7')
+p8 = fviz_cluster(k8, geom = "point", data = data) + ggtitle('k=8')
+p9 = fviz_cluster(k9, geom = "point", data = data) + ggtitle('k=9')
+p10 = fviz_cluster(k10, geom = "point", data = data) + ggtitle('k=10')
+p11 = fviz_cluster(k11, geom = "point", data = data) + ggtitle('k=11')
+p12 = fviz_cluster(k12, geom = "point", data = data) + ggtitle('k=12')
+
+grid.arrange(p2,p3,p4,p5, ncol=2)
+grid.arrange(p6,p7, nrow=2)
+```
+
+
+```{r fig.asp=.65, echo=FALSE}
+grid.arrange(p8,p9, nrow=2)
+p10
+p11
+p12
+
+```
+
+## C: Plotting the mean distance from the centroid of each cluster given a value k
+
+```{r fig.height = 3}
+fviz_nbclust(data, kmeans, method = "silhouette")
+fviz_nbclust(data, kmeans, method = "wss")
+```
+
+kmeans uses the sum of the squares of the euclidean distance of all points to the center of the cluster. This is used in the elbow method but is different than requested, as the mean of the distance between all points in a cluster and the cluster's centroid is not the same as the sum of squares. I have not found anything in my reading which indicates how to do the latter properly although it should be doable by adding a euclidean distance feature to each observation relative to its assigned cluster and creating a plot based on the means of those distances in each cluster. Given the specific request for the elbow method, however, I think the sum of sqaures method is what is actually being requested and I'm overthinking the assignment. 
+
+## D: Analyzing the elbow
+
+The elbow appears to be 2 but successive iterations have shown 3, 4 and 5 as well. The Silhouette method however says two is the optimal number of clusters.

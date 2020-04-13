@@ -1,0 +1,125 @@
+---
+title: "Assignment_5.1_HillZach"
+author: "Zach Hill"
+date: "April 15, 2019"
+output: html_document
+---
+
+```{r setup, echo = FALSE, results = 'hide', message = FALSE}
+library(readr)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(ggpubr)
+library(grid)
+library(gridExtra)
+library(Hmisc)
+library(ggplot2)
+library(ppcor)
+```
+
+## Load Data
+
+```{r load, message = FALSE}
+survey <- read_csv("./student-survey.csv")
+```
+
+## Analyze Data
+
+Covariance tells us how far from the mean both variables are relative to each other. As one variable deviates, we expect the other to deviate in a similar fashion in terms of absolute value as relatioships can be strong both positively and negatively. Covariance then can be used to describe how close a bivariate relationship is. This value can translate between datasets but only if the variables are measured in the same way. Comparing apples to apples, one might say.
+
+```{r analyze, collapse = TRUE}
+cov(survey$TimeReading, survey$TimeTV)
+cov(survey$TimeReading, survey$Happiness)
+cov(survey$TimeReading, survey$Gender)
+cov(survey$TimeTV, survey$Happiness)
+cov(survey$TimeTV, survey$Gender)
+cov(survey$Happiness, survey$Gender)
+
+str(survey)
+```
+
+The measures of each variable appear to be unrelated. TimeReading is likely hours per week but could also be hours per day. It is very unlikely TimeTV is measured on the same scale as 90 hours per week is beyond extreme and 90 minutes per week is equally as extreme in the other direction. My assumption would be 90 minutes per day. Happiness is an unquantifiable value as it is completely subjective and not constant. There could be a scale that was used or perhaps a questionaire that was administered that gave a quantifiable result on a happiness scale but this has not been disclosed to us. Gender is obviously not a numeric indicator but works for this as it does not cause the researcher to make assumptions about the data which might happen in the case of being told whether 1 = male or female or vice versa. 
+
+The covariance calculation would certainly make more sense in an intuitive way were all measures changed to minutes per day or something similar. This would only accomodate two variables (little can be done with the other two) but the relationship would still be the same. As long as any comparison is done between datasets with the same measures, comparative analysis can be performed. Or you could use the standard deviations and forget most of the worry of measures.
+
+## Correlation Testing
+
+```{r fig.width = 10}
+cor.test(survey$TimeReading, survey$TimeTV,
+         alternative = "two.sided",
+         method = "pearson",
+         exact = NULL,
+         conf.level = 0.95,
+         continuity = FALSE)
+
+ggscatter(survey, x = "TimeReading", y = "TimeTV", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Time Spent Reading", ylab = "Time Spent Watching TV")
+```
+
+```{r echo = FALSE}
+read.shap <- shapiro.test(survey$TimeReading)
+read.qqplot <- ggqqplot(survey$TimeReading, ylab = "Time Spent Reading")
+tv.shap <- shapiro.test(survey$TimeTV)
+tv.qqplot <- ggqqplot(survey$TimeTV, ylab = "Time Spent Watching TV")
+```
+
+I chose to use the Pearson test for this analysis. When comparing Time Spent Reading vs Time Spent Watching TV, we see a strong negative correlation. We also see an extremely low p-value, which I take to mean the null hypothesis is extremely unlikely, that time spent reading correlates heavily to time spent NOT watching TV.
+
+```{r}
+list(read.shap, tv.shap)
+```
+
+ I also decided to verify if the sample data were normally distributed, which the plots above imply to be the case.
+ 
+## Other Correlations
+ 
+```{r echo = FALSE, fig.width = 10, fig.height = 2.5}
+haptv <- ggscatter(survey, y = "Happiness", x = "TimeTV", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          ylab = "Happiness", xlab = "Time Spent Watching TV")
+
+#gentv <- ggscatter(survey, y = "Gender", x = "TimeTV", 
+#          add = "reg.line", conf.int = TRUE, 
+#          cor.coef = TRUE, cor.method = "pearson",
+#          ylab = "Gender", xlab = "Time Spent Watching TV")
+
+gentv <- ggplot(survey, aes(Gender, TimeTV)) +
+  geom_bar(stat = "identity")
+
+hapread <- ggscatter(survey, y = "Happiness", x = "TimeReading", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          ylab = "Happiness", xlab = "Time Spent Reading")
+
+#genread <- ggscatter(survey, y = "Gender", x = "TimeReading", 
+#          add = "reg.line", conf.int = TRUE, 
+#          cor.coef = TRUE, cor.method = "pearson",
+#          ylab = "Gender", xlab = "Time Spent Reading")
+
+genread <- ggplot(survey, aes(Gender, TimeReading)) +
+  geom_bar(stat = "identity")
+
+grid.arrange(haptv, gentv, hapread, genread, ncol = 4)
+```
+
+What we see above implies that happiness was somewhat correlated to time spent both watching TV and reading with Happiness vs Time spent watching TV being within the confidence interval range. The two genders showed little difference in the time they spent doing either task. There is no evidence to suggest causality in any of the above tests and with the high degree of variance in the time spent reading measurements there isnt much correlation suggested either. It is possible causailty can be proven to exist between time spent reading and time spent watching TV, but being that time is finite there is a point at which doing one activity will prevent one from participating in the other.
+
+
+```{r fig.width = 10}
+cor.test(survey$TimeReading, survey$TimeTV,
+         alternative = "two.sided",
+         method = "pearson",
+         exact = NULL,
+         conf.level = 0.99,
+         continuity = FALSE)
+```
+
+```{r}
+pcor.test(survey$TimeTV, survey$Happiness, survey$Gender, method = c("pearson"))
+```
+
+This test shows that with the addition of gender as a control variable there may be more correlation between Happiness and time spent watching TV. 

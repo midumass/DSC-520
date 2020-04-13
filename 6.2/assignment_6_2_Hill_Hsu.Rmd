@@ -1,0 +1,185 @@
+---
+title: 'Assignment 6.2: Housing Data'
+author: "Zachary Hill and Alan Hsu"
+date: "21 Apr 2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Assignment Description
+  
+Work with your previously assigned team members on this assignment. Data for this assignment is focused on real estate transactions recorded from 1964 to 2016 and can be found in Week 6 Housing.xlsx. Using your skills in statistical correlation, regression and R programming, you are interested in the following variables:  Sale Price and Square Footage of Lot.
+
+### Setup
+
+This set of code is meant to open each package necessary for the assignment as well as set the working directory based on the folder structure. 
+
+```{r universal_setup, message = FALSE, warning = FALSE}
+library(readxl)
+library(ggplot2)
+library(ggm)
+library(gridExtra)
+library(kableExtra)
+
+# This is the setup for Zach's directory
+# input_file <- './week-6-housing.xlsx'
+
+# This is the setup for Alan's directory
+setwd("~\\GitHub\\School\\DSC-520")
+input_file <- "Data\\week-6-housing.xlsx" # Alan setup
+
+housing_data <- read_excel(input_file)
+```
+
+```{r universale_setup, warning = FALSE, message = FALSE}
+# Changed column names to avoid discrepancies using quotations and to match other columns
+colnames(housing_data)[colnames(housing_data)=='Sale Price'] <- 'sale_price'
+colnames(housing_data)[colnames(housing_data)=='Sale Date'] <- 'sale_date'
+```
+
+### Tasks
+#### a. Examine the data set visually and numerically. Are there missing data? Does that data contain outliers? Explain how you will handle missing data and outliers so you have a clean data set going forward.
+
+Visually:
+
+```{r echo=FALSE}
+ggplot(data=housing_data, aes(x=sq_ft_lot, y=sale_price)) + geom_point()
+```
+
+Numerically:
+
+```{r}
+summary(housing_data$sale_price)
+summary(housing_data$sq_ft_lot)
+```
+
+Also, using the *sum()* and *is.na()* functions, for these 2 variables and the two used in later analysis, there is no missing data:
+
+```{r, echo = FALSE}
+sum_sp <- sum(is.na(housing_data$sale_price))
+sum_slot <- sum(is.na(housing_data$sq_ft_lot))
+sum_br <- sum(is.na(housing_data$bedrooms))
+sum_sliv <- sum(is.na(housing_data$square_feet_total_living))
+
+sum_df_cols <- c('Sale Price', 'Lot sqft', 'Bedrooms', 'Living sqft')
+sum_df <- as.data.frame(list(sum_sp, sum_slot, sum_br, sum_sliv), col.names = sum_df_cols)
+
+kable(sum_df, align = 'c', caption = 'NA total sums') %>%
+  kable_styling(full_width = F)
+```
+
+The sum would be greater than 0 if there were missing values. From the visualization, we can see that there are a few outliers. 
+
+Since there is no missing data, no data cleaning in that respect is needed. For the outliers, we could drop them from the data but it ultimately doesn't affect the conclusions. If needed, can remove outliers with the following:
+
+```{r, eval = FALSE}
+housing_data_rm <- subset(housing_data, 
+                          housing_data$sq_ft_lot <= min(boxplot.stats(housing_data$sq_ft_lot)$out))
+```
+
+This removes the outliers using box plot statistics.
+
+#### b. Construct scatterplots for the variables in R studio and place the best-fit linear regression line on each scatterplot. Describe the relationship between the variables in each plot.
+
+```{r echo=FALSE}
+ggplot(data=housing_data, aes(x=sq_ft_lot, y=sale_price)) + 
+  geom_point() + 
+  geom_smooth(method='lm', se=FALSE)
+```
+
+From the best-fit linear regression, there is a small positive correlation between the 2 variables. However, given the multitude of data points that are separate from the rest, there is a possibility that it's a weak correlation. Overall, an increase in the square foot lot means a higher sales price. 
+
+#### c. Use R to calculate the covariance of the two variables and provide an explanation of why you would use this calculation and what the results indicate.
+
+```{r echo=FALSE}
+cov(housing_data$sale_price, housing_data$sq_ft_lot)
+```
+
+The covariance shows the variability in both variables compared to each other. The magnitude of covariance isn't as important since it's dependent on the units/measurements of the variables that are being compared. So it is mainly a large number due to the large range in *Sale Price* and *sq_ft_lot*. However, it indicates that as 1 variable increases, the other does as well.
+
+#### d. Choose the type of correlation test to perform, explain why you chose this test, and make a prediction if the test yield a positive or negative correlation?
+
+The Spearman correlation test is good because the data is not normalized and it is a large dataset. However, unlike the Kendall test, there are not many data points that have a "tied" ranking due to the variability of the dataset. Based on the positive covariance, the correlation will be positive. 
+
+#### e. Perform a correlation analysis of the variables and describe what the calculations in the correlation matrix suggest about the relationship between the variables. Be specific with your explanation.
+
+```{r echo=FALSE}
+cor(housing_data$sale_price, housing_data$sq_ft_lot, method='spearman')
+```
+
+This value shows that there is a small relationship between the 2 variables. The 2 variables have some effect on each other, but there are other variables that contribute more. So trying to base the sales price of a home from the square footage of the lot is helpful, but not a good/accurate indicator. 
+
+#### f. Calculate the correlation coefficient and the coefficient of determination, describe what you conclude about the results.
+
+```{r echo=FALSE}
+cor(housing_data$sale_price, housing_data$sq_ft_lot, method='spearman')
+cor(housing_data$sale_price, housing_data$sq_ft_lot, method='spearman')^2
+```
+
+The coefficient of determination shows the percent of effect that 1 variable has on the other. Specifically, the *sq_ft_lot* variable has about a `r round(cor(housing_data$sq_ft_lot, housing_data$sale_price, method='spearman')^2 * 100, 2)`% effect. The remaining percent is caused by some other variables. Some examples could be the number of bedrooms and/or number of bathrooms that would affect the sale price. Another variable could be the location of the house. 
+
+#### g. Based on your analysis what can you say about the relationship between the variables?
+
+The relationship between the variables is that they have a very small effect on each other. 
+
+#### h. Produce an appropriate graph for the variables. Use R Markdown to report, critique and discuss the skewness and any significant scores found.
+
+Sale Price:
+
+```{r echo=FALSE, fig.width = 10}
+sale_plot <- ggplot(housing_data, aes(x=sale_price)) + 
+  ggtitle('Sale Price Histogram') +
+  xlab('Sale Price') +
+  ylab('Units Sold') +
+  geom_histogram(binwidth=100000)
+
+sqft_plot <- ggplot(housing_data, aes(x=sq_ft_lot)) + 
+  ggtitle('Lot Square Footage Histogram') +
+  xlab('Square Footage') +
+  ylab('Units Sold') +
+  geom_histogram(binwidth=20000)
+
+grid.arrange(sale_plot, sqft_plot, ncol = 2)
+```
+
+In the sale price data there is a skew to the right, with a majority of the houses listed on the low end. From the chart, it's possible to see the existence of outliers, but the difficulty is determining where that "line" of outliers is drawn. I don't believe any data should be removed. 
+
+With the lot square footage data there is a large skew to the right. The majority of the houses are listed on the low end. Similar to the *Sale Price*, there is a large congregation of values on the lower end. Unlike *Sale Price* though, the outliers are more extreme and easier to spot. 
+
+#### i. Perform a partial correlation, controlling  for Bedrooms and Square Feet Total Living. Explain how this changes your interpretation and explanation of the results.
+
+```{r echo=FALSE, warning=FALSE}
+suppressWarnings(pcor(c('sale_price', 'sq_ft_lot', 'bedrooms', 'square_feet_total_living'), var(housing_data)))
+```
+
+Given that the correlation decreases significantly when controlling *bedrooms* and *square_feet_total_living*, it leads to the conclusion that the *sq_ft_lot* does not affect the *sale price* very much at all. In a way, the partial correlation only works to show that *bedrooms* and/or *square_feet_total_living* are the variables with a stronger influence over the *sale price*. 
+
+#### j. Choose Square Footage of Lot as the Predictor and Sale Price as the Outcome and perform a regression analysis.
+
+```{r echo=FALSE}
+housing_reg <- lm(sale_price ~ sq_ft_lot, housing_data)
+summary(housing_reg)
+```
+
+#### k. What are the intercept and the slope? What are the coefficient of determination and the correlation coefficient?
+
+The intercept of the model is `r format(housing_reg$coefficients[1], scientific=FALSE)`. The slope is `r round(housing_reg$coefficients[2], 2)`. The coefficient of determination is `r round(summary(housing_reg)$r.squared, 2)`. The correlation coefficient is `r round(sqrt(summary(housing_reg)$r.squared), 2)`. 
+
+#### l. For this model, what variation exists. Be specific in your response.
+
+Referring back to the *summary* value above, there is a lot of variation (from the residuals and the standard error). Considering that the standard error on the intercept is so large, the starting point of the line could be in different places. Also, the residual standard error is quite high as well. Since the magnitude of the variables is high, the slider of values can take on a multitude of points. 
+
+#### m. Based on the calculated F-Ratio does this regression model result in a better prediction of the sale price than if you had chosen to use the mean value of square footage of lot?
+
+It's possible to see the F-ratio from the summary above. 
+
+Due to the F-ratio being relatively high and the p-value being tiny, the regression model is a better prediction than using the mean value to predict the *sale price* of a house. 
+
+#### n. Use the model to make a prediction of your choice. Explain the values you use in the model and the resulting prediction as well as how someone might benefit from using this model.
+
+```{r echo=FALSE}
+predict(housing_reg, data.frame(sq_ft_lot=(mean(housing_data$sq_ft_lot) - median(housing_data$sq_ft_lot))))
+```
+
+In order to avoid picking too random of a value, the mean and median of *sq_ft_lot* were used. So, the model predicts that a house with a square footage lot of `r format(mean(housing_data$sq_ft_lot) - median(housing_data$sq_ft_lot), scientific=FALSE)` will have a sales price of `r format(predict(housing_reg, data.frame(sq_ft_lot=(mean(housing_data$sq_ft_lot) - median(housing_data$sq_ft_lot)))), scientific=FALSE)`. This model is very useful for people who are searching for a specific amount of square footage of lot. This helps with deciding what sort of price range users of the model can be expecting when shopping for houses. 

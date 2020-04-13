@@ -1,0 +1,113 @@
+---
+title: "Assignment_5.2_HillZach"
+author: "Zach Hill"
+date: "April 16, 2019"
+output: html_document
+---
+
+```{r setup, echo = FALSE, results = 'hide', message = FALSE}
+library(readr)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(scales)
+```
+
+## Imported Data
+
+The associated .txt files are loaded using read_csv (because despite the extension, they are CSV's).
+
+```{r import, results = 'hide', message = FALSE}
+dcdon <- read_csv("./donations-2015-2016-DC.txt")
+nedon <- read_csv("./donations-2015-2016-NE.txt")
+```
+
+## Summary of Data
+
+
+### DC Summary
+
+The DC Donations show 10650 NA's across the entire dataset. 
+
+```{r dc_summary, message = FALSE, collapse = TRUE}
+summary(dcdon)
+sum(is.na(dcdon))
+
+```
+
+### NE Summary
+
+There are 3673 NA's in the Nebraska dataset.
+
+```{r ne_summary, message = FALSE, collapse = TRUE}
+summary(nedon)
+sum(is.na(nedon))
+
+```
+
+## Cleaning Data
+
+First, entries with missing data are omitted. Next, entries with invalid donation amounts are omitted ($0 or less because donating nothing is the same as not donating). Next we clean the column names
+
+```{r dc_cleanup}
+dcdon <- na.omit(dcdon)
+dcdon <- dcdon[ dcdon$donation_amount > 0, ]
+
+```
+
+```{r ne_cleanup}
+nedon <- na.omit(nedon)
+nedon <- nedon[ nedon$donation_amount > 0, ]
+
+```
+
+## Cleaned Data
+
+The first few rows of data is displayed as an example below:
+
+```{r cleaned, message = FALSE}
+clean_columns <- c(
+  'Candidate Name', 'Party Affiliation', 'Election Year', 'Candidate State', 'Candidate Office', 
+  'Incumbent Challenger', 'Committee Name', 'Committee Party', 'Donor Name', 'Donor City', 'Donor State', 
+  'Donor Zip', 'Donor Employer', 'Donor Occupation', 'Donation Amount', 'Donation Date')
+
+kable(head(dcdon), col.names = clean_columns, caption = 'DC Donations') %>%
+  kable_styling(bootstrap_options = "striped", font_size = 7) %>%
+  column_spec(16, width = '8em')
+
+kable(head(nedon), col.names = clean_columns, caption = 'NE Donations') %>%
+  kable_styling(bootstrap_options = "striped", font_size = 7) %>%
+  column_spec(16, width = '8em')
+```
+
+## Analyzed Data
+
+
+
+```{r analysis}
+dcdata <- dcdon %>%
+  group_by('Party Affiliation' = party_affiliation) %>%
+  summarise(
+    'Total Donations' = dollar(sum(donation_amount)),
+    'Average Donation' = dollar(mean(donation_amount))) #%>%
+  #kable() %>%
+  #kable_styling(bootstrap_options = "striped", full_width = FALSE, position = 'left')
+
+nedata <- nedon %>%
+  group_by('Party Affiliation' = party_affiliation) %>%
+  summarise(
+    'Total Donations' = dollar(sum(donation_amount)),
+    'Average Donation' = dollar(mean(donation_amount))) #%>%
+  #kable() %>%
+  #kable_styling(bootstrap_options = "striped", full_width = FALSE, position = 'right')
+
+kable(list(dcdata, nedata)) %>%
+  kable_styling(bootstrap_options = "striped", position = 'center')
+
+```
+
+As we can see, the Democratic party in DC raised the largest amount of money by a wide margin. Their average donations however were almost the smallest among all groups. The NPP had the highest average contributions in Washington. The results in Nebraska were quite different, with the GOP pulling in the most donations by slight margin and the highest average donation by quite a bit.
+
+```{r}
+
+```

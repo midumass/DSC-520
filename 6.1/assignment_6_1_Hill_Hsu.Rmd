@@ -1,0 +1,142 @@
+---
+title: 'Assignment 6.1: GSS 2016 Survey Data'
+author: "Zachary Hill and Alan Hsu"
+date: "21 Apr 2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Assignment Description
+  
+As a data science intern with newly learned knowledge in skills in statistical correlation, regression and R programming, you are interested in looking at the GSS 2016 survey data, specifically the Siblings and Childs variables have peaked your interest. A codebook for the GSS is available here: GSS_Codebook_Index.pdf and contains all of the GSS variables and descriptions. 
+
+The first question you are interested in answering is:  "Is there a significant relationship between the number of siblings a survey respondent has and number of his or her children?"  
+
+##### Setup
+
+This set of code is meant to open each package necessary for the assignment as well as set the working directory based on the folder structure. 
+
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+library(readr)
+library(pastecs)
+library(ggm)
+
+# This is the setup for Zach's directory
+# input_file <- './gss-2016.csv'
+
+# This is the setup for Alan's directory
+setwd("~\\GitHub\\School\\DSC-520\\")
+input_file <- "Data\\gss-2016.csv"
+
+survey_data <- read_csv(input_file)
+```
+
+## Tasks
+
+### Part 1
+#### a. Construct a scatterplot of these two variables in R studio and place the best-fit linear regression line on the scatterplot. Describe the relationship between the number of siblings a respondent has (SIBS) and the number of his or her children (CHILDS).
+
+```{r echo=FALSE, warning=FALSE}
+ggplot(data=survey_data, aes(x=SIBS, y=CHILDS)) + 
+  geom_point(position = 'jitter', alpha = 0.25) + 
+  geom_smooth(method='lm', se=FALSE)
+```
+
+From the best-fit linear regression line, the number of children increases as the number of siblings increases. However, given the number of respondents who had many children without having many siblings, the number of siblings is not a clear indicator of the number of children a respondent would have. 
+
+#### b. Use R to calculate the covariance of the two variables and provide an explanation of why you would use this calculation and what the results indicate.
+
+```{r echo=FALSE}
+cov(survey_data$SIBS, survey_data$CHILDS, use='complete.obs')
+```
+
+Covariance is a measure of how much the variables affect each other. Higher covariance means the variables affect each other more. However, since the covariance is so low, *CHILDS* and *SIBS* have a very low effect on each other.
+
+#### c. Choose the type of correlation test to perform, explain why you chose this test, and make a prediction if the test yields a positive or negative correlation?
+
+I believe the Kendall Tau test would be best. The reason is that there are a lot of "tied rankings" since there are many respondents with the same number of siblings and/or the same number of children and the dataset is not normally distributed. Based on the positive covariance, the test will yield a positive correlation. 
+
+#### d. Perform a correlation analysis of the two variables and describe what the calculations in the correlation matrix suggest about the relationship between the variables. Be specific with your explanation.
+
+```{r echo=FALSE}
+cor(survey_data$SIBS, survey_data$CHILDS, use='complete.obs', method='kendall')
+```
+
+Correlation yields a number between -1 and 1. This is another measurement to show how much the 2 variables affect each other. Based on the correlation coefficient, the variables have a small effect on each other, supporting the conclusion from the covariance measurement. 
+
+#### e. Calculate the correlation coefficient and the coefficient of determination, describe what you conclude about the results.
+
+```{r echo=FALSE}
+cor(survey_data$SIBS, survey_data$CHILDS, use='complete.obs', method='kendall')
+cor(survey_data$SIBS, survey_data$CHILDS, use='complete.obs', method='kendall')^2 * 100
+```
+
+The correlation coefficient is the value described above. The coefficient of determination is the correlation coefficient squared. The coefficient of determination is the percentage that one variable affects the other. So the *CHILDS* and *SIBS* have a `r round(cor(survey_data$SIBS, survey_data$CHILDS, use='complete.obs', method='kendall')^2 * 100, 2)`% effect on each other. The remaining percent is of the variability is caused by other factors. One example that would contribute to a decision on the number of children could be the financial aspect.
+
+#### f. Based on your analysis, what can you say about the relationship between the number of siblings and the number of his or her children?
+
+There is a very small relationship between the number of siblings and the number of children the respondent has.
+
+#### g. Produce an appropriate graph for the variables. Report, critique and discuss the skewness and any significant scores found. 
+
+```{r echo=FALSE, warning=FALSE}
+ggplot(data=survey_data, aes(x=SIBS)) + 
+  geom_histogram(binwidth=1) +
+  ggtitle('Siblings')
+```
+
+From the graph, there is a skew to the right. There are a few respondents who have many siblings that is outside of the norm. Given that the average amount of siblings is `r round(mean(survey_data$SIBS, na.rm=TRUE), 2)`, there are a few respondents who sit outside of that. 
+
+```{r echo=FALSE, warning=FALSE}
+ggplot(data=survey_data, aes(x=CHILDS)) + 
+  geom_histogram(binwidth = 1) +
+  ggtitle('Children')
+
+```
+
+Unlike the *SIBS* variable, there aren't any obvious outliers in the *CHILDS* variable. However, there was a high amount of respondents who did not have any children.
+
+#### h. Expand your analysis to include a third variable - Sex. Perform a partial correlation, "controlling" the Sex variable. Explain how this changes your interpretation and explanation of the results.
+
+```{r echo=FALSE}
+survey_data_rm <- survey_data[!is.na(survey_data$SIBS), ]
+survey_data_rm <- survey_data_rm[!is.na(survey_data_rm$CHILDS), ]
+```
+
+This removes the respondent results where the *SIBS* and *CHILDS* variables are not null or missing. These results are removed in order to perform a partial correlation as the function doesn't work with missing values. 
+
+```{r echo=FALSE}
+pcor(c('SIBS', 'CHILDS', 'SEX'), var(survey_data_rm))
+```
+
+Although there is a stronger correlation between *SIBS* and *CHILDS* when *SEX* is controlled, it's still a small effect. So regardless of the gender, the variables still have a small effect on each other. So the conclusion still remains the same. 
+
+### Part 2
+#### a. Run a regression analysis where SIBS predicts CHILDS.
+
+```{r echo=FALSE}
+survey_reg <- lm(CHILDS ~ SIBS, survey_data)
+summary(survey_reg)
+```
+
+#### b. What are the intercept and the slope? What are the coefficient of determination and the correlation coefficient?
+
+The intercept is `r round(survey_reg$coefficients[1], 2)`. The slope is `r round(survey_reg$coefficients[2], 2)`. The coefficient of determination is `r round(summary(survey_reg)$r.squared, 2)`. The correlation coefficient is the square root of that: `r round(sqrt(summary(survey_reg)$r.squared), 2)`
+
+#### c. For this model, how do you explain the variation in the number of children someone has? What is the amount of variation not explained by the number of siblings?
+
+The variation in the number of children someone has is not affected by the number of siblings very much. The standard error of the intercept, slope, and the residual standard error are all very small. The amount of variation not explained by the number of siblings is `r round(100 - summary(survey_reg)$r.squared, 2)`%. 
+
+#### d. Based on the calculated F-Ratio does this regression model result in a better prediction of the number of children than if you had chosen to use the mean value of siblings?
+
+From the summary output above, the F-ratio is really high and the p-value is very low. So the regression model results in a better prediction of the number of children than just the mean value of siblings. 
+
+#### e. Use the model to make a prediction: What is the predicted number of children for someone with three siblings?
+
+The model predicts that someone with 3 siblings will have `r floor(predict(survey_reg, data.frame(SIBS=3)))` child. This is rounded down since fractions/decimals of a child don't make sense (or are at least concerning). 
+
+#### f. Use the model to make a prediction: What is the predicted number of children for someone without any siblings?
+
+The model predicts that someone with no siblings will have `r floor(predict(survey_reg, data.frame(SIBS=0)))` child. Similar to *part e*, this is rounded down to a whole number of children. 

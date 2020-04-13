@@ -1,0 +1,78 @@
+---
+title: "Assignment_6.1_Hsu_Hill"
+author: "Zach Hill and Alan Hsu"
+date: "April 19, 2019"
+output: html_document
+---
+
+```{r setup, echo = FALSE, results = 'hide', message = FALSE}
+library(readr)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(ppcor)
+```
+
+```{r import}
+survey <- read_csv('./gss-2016.csv')
+childs <- survey$CHILDS
+sibs <- survey$SIBS
+sex <- survey$SEX
+```
+
+## Part 1
+
+```{r 1_1}
+#childs_hist <- hist(childs, breaks = seq(0,8,1))
+#sibs_hist <- hist(sibs, breaks = seq(0,43,1))
+
+ggplot(survey, aes(sibs, childs), alpha = 3) +
+  geom_point(position = 'jitter') +
+  geom_smooth(method = 'lm', se = FALSE)
+```
+
+```{r 1_b}
+cov(sibs, childs, use="pairwise.complete.obs", method = "pearson")
+```
+The covariance of these two variables indicates that for each sibling a person has, they are likley to have 1.06 children
+
+```{r 1_cd}
+cor(sibs, childs, use="pairwise.complete.obs", method = "pearson")
+```
+There is a weak positive correlation between number of children and number of siblings as indicated. This is not surprising given the empirical review of the plot as the mean number of children is under 2 while the mean number of siblings is just under 4.
+
+```{r 1_ef}
+summary(lm(childs ~ sibs, data = survey))$r.squared
+```
+With R-squared lower than .05, this model does not very well predict that people will have a certain number of children based on their number of siblings
+
+```{r 1_g, fig.width = 10}
+sibs_hist <- ggplot(survey, aes(SIBS)) +
+  geom_histogram()
+
+childs_hist <- ggplot(survey, aes(CHILDS)) +
+  geom_histogram()
+
+grid.arrange(sibs_hist, childs_hist, ncol = 2)
+```
+Both charts are skewed right, and the siblings chart has an outlier. This is likely as mistake as 40 siblings is nigh-on impossible. The Childs chart wraps bars incorrectly. This needs to be cleaned up. A non-ggplot histogram works but cannot be grob'd
+
+```{r 1_h}
+#pcor.test(survey$SIBS, survey$CHILDS, survey$SEX, method = c("pearson"))
+```
+
+Pcor cannot run with missing values. This will require cleaning.
+
+
+## Part 2
+```{r 2_ab}
+lm(sibs ~ childs, data = survey)
+cov(childs, sibs, use="pairwise.complete.obs", method = "pearson")
+cor(childs, sibs, use="pairwise.complete.obs", method = "pearson")
+summary(lm(sibs ~ childs, data = survey))$r.squared
+```
+
+More Work needed, maybe some clarification. cov and cor will be the same for both analyses, slope and inteercept will be different but to me it sounded like x was supposed to be SIBS from the start of part 1 so I'm not sure what's being asked

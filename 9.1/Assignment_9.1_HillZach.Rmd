@@ -1,0 +1,131 @@
+---
+title: "Assignment_9.1_HillZach"
+author: "Zach Hill"
+date: "May 11, 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, warning=FALSE, echo=FALSE, results='hide', message=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(readr)
+library(class)
+library(gmodels)
+library(grid)
+library(gridExtra)
+
+input_file1 <- './binary-classifier-data.csv'
+input_file2 <- './trinary-classifier-data.csv'
+
+bin <- read_csv(input_file1)
+trin <- read_csv(input_file2)
+
+bin$label <- as.factor(bin$label)
+trin$label <- as.factor(trin$label)
+
+set.seed(1978)
+```
+
+## A: Plotted data from original datasets
+
+```{r fig.width = 10, fig.height = 4, echo = FALSE}
+bin_plot <- ggplot(bin, aes(x = x, y = y)) +
+  geom_point(aes(color = label), alpha = '.25') +
+  ggtitle("Binary Data Plot")
+
+trin_plot <- ggplot(trin, aes(x = x, y = y)) +
+  geom_point(aes(color = label),alpha = '.25') +
+  ggtitle("Trinary Data Plot")
+
+grid.arrange(bin_plot, trin_plot, ncol = 2)
+```
+
+## B.1: Constructing Test and Training datasets
+
+First we separate our datasets into training and testing datasets. In most cases we would then normalize the data due to differing units of measure but in this case I have elected not to since the numbers dont really have any defined unit of measure. I have also elected to use a randomly generated dataset each time the datasets are built. This will result in a better picture of the data as more iterations are run as the accuracy will change slightly and eventually regress towards the mean. Additionally if you change the size of the coefficient in the sample and recreate the datasets, different accuracies will show.
+
+```{r}
+bin_sample <- sample(seq_len(nrow(bin)), size = floor(.75 * nrow(bin)))
+bin_train <- bin[bin_sample, 2:3]
+bin_train_label <- bin[bin_sample, 1, drop = TRUE]
+bin_test <- bin[-bin_sample, 2:3]
+bin_test_label <- bin[-bin_sample, 1, drop = TRUE]
+
+trin_sample <- sample(seq_len(nrow(trin)), size = floor(.75 * nrow(trin)))
+trin_train <- trin[trin_sample, 2:3]
+trin_train_label <- trin[trin_sample, 1, drop = TRUE]
+trin_test <- trin[-trin_sample, 2:3]
+trin_test_label <- trin[-trin_sample, 1, drop = TRUE]
+```
+
+Next we would run the kNN algorithm (kmeans or knn are two examples I found) against the datasets to predict whether the results would indicate a label of 0 or 1. I elected to use knn as the syntax made more sense to me. 
+
+```{r}
+bin_k3 <- table(knn(train = bin_train, test = bin_test, cl = bin_train_label, k = 3), bin_test_label)
+bin_k5 <- table(knn(train = bin_train, test = bin_test, cl = bin_train_label, k = 5), bin_test_label)
+bin_k10 <- table(knn(train = bin_train, test = bin_test, cl = bin_train_label, k = 10), bin_test_label)
+bin_k15 <- table(knn(train = bin_train, test = bin_test, cl = bin_train_label, k = 15), bin_test_label)
+bin_k20 <- table(knn(train = bin_train, test = bin_test, cl = bin_train_label, k = 20), bin_test_label)
+bin_k25 <- table(knn(train = bin_train, test = bin_test, cl = bin_train_label, k = 25), bin_test_label)
+
+trin_k3 <- table(knn(train = trin_train, test = trin_test, cl = trin_train_label, k = 3), trin_test_label)
+trin_k5 <- table(knn(train = trin_train, test = trin_test, cl = trin_train_label, k = 5), trin_test_label)
+trin_k10 <- table(knn(train = trin_train, test = trin_test, cl = trin_train_label, k = 10), trin_test_label)
+trin_k15 <- table(knn(train = trin_train, test = trin_test, cl = trin_train_label, k = 15), trin_test_label)
+trin_k20 <- table(knn(train = trin_train, test = trin_test, cl = trin_train_label, k = 20), trin_test_label)
+trin_k25 <- table(knn(train = trin_train, test = trin_test, cl = trin_train_label, k = 25), trin_test_label)
+```
+
+## B.2: Analyzing results of kNN
+
+Next we check the accuracy of our models, to see how close our predictions match real world data. I defined a function to make this easier.
+
+```{r}
+acc <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
+```
+
+Below are the relative accuracies of kNN for the binary data. These data are plotted to show how changing k changes the accuracy.
+
+```{r collapse=TRUE}
+acc(bin_k3)
+acc(bin_k5)
+acc(bin_k10)
+acc(bin_k15)
+acc(bin_k20)
+acc(bin_k25)
+```
+```{r collapse = TRUE}
+
+acc(trin_k3)
+acc(trin_k5)
+acc(trin_k10)
+acc(trin_k15)
+acc(trin_k20)
+acc(trin_k25)
+```
+
+```{r echo=FALSE, fig.width = 10, fig.height = 4}
+bin_acc <- c(acc(bin_k3), acc(bin_k5), acc(bin_k10), acc(bin_k15), acc(bin_k20), acc(bin_k25))
+bin_acc_label <- c('3', '5', '10', '15', '20', '25')
+bin_df <- do.call(rbind, Map(data.frame, 'Accuracy' = bin_acc, 'k' = bin_acc_label))
+
+bin_acc_plot <- ggplot(bin_df, aes(x = k, y = Accuracy)) + 
+  geom_point() +
+  ggtitle("Binary Data Accuracy Plot")
+
+trin_acc <- c(acc(trin_k3), acc(trin_k5), acc(trin_k10), acc(trin_k15), acc(trin_k20), acc(trin_k25))
+trin_acc_label <- c('3', '5', '10', '15', '20', '25')
+trin_df <- do.call(rbind, Map(data.frame, 'Accuracy' = trin_acc, 'k' = trin_acc_label))
+
+trin_acc_plot <- ggplot(trin_df, aes(x = k, y = Accuracy)) + 
+  geom_point() +
+  ggtitle("Trinary Data Accuracy Plot")
+
+grid.arrange(bin_acc_plot, trin_acc_plot, ncol = 2)
+```
+
+## C: Linear Classifiers
+
+These datasets are heavily grouped in random regions leaving me to believe there is no linear classification which might apply.

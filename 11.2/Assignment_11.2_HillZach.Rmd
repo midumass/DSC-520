@@ -1,0 +1,122 @@
+---
+title: "Assignment_11.2_HillZach"
+author: "Zach Hill"
+date: "May 26, 2019"
+output: pdf_document
+---
+
+```{r setup, warning=FALSE, echo=FALSE, results='hide', message=FALSE}
+library(readr)
+library(ggplot2)
+library(dplyr)
+```
+### a. Load the word frequency data into a dataset. The initial dataset should have two variables, the word and the number of occurrences of that word. Create a third variable for word probability that provides the overall probability of that word occurring in the dataset.
+
+```{r}
+input_file <- './en_full.txt'
+data <- read.table(input_file, sep = " ")
+data <- data %>% mutate(V3 = V2 / sum(V2))
+```
+### b. Create a function that when given an input word, returns a list of candidates that are within two edits from the input word. The returned candidates should be within the known word list. Use Norvig’s Python implementation, How to Write a Spelling Corrector, for reference. Demonstrate this function on colum, heirarchy, knowlege, and adres.
+
+```{r}
+letters <- 'abcdefghijklmnopqrstuvwxyz'
+
+edits1 <- function(word) {
+  
+  deletes <- c()
+  for (l in seq(1:nchar(word)))
+    deletes <- c(deletes, paste0(substr(word, start = 0, stop = l-1), substr(word, start = l+1, stop = nchar(word))))
+  
+  transposes <- c()
+  vec_word <- strsplit(word, split = '')[[1]]
+  for (l in seq(1:(nchar(word)-1))) {
+    vec_word_tmp <- vec_word
+    splice <- rev(vec_word_tmp[l:(l+1)])
+    vec_word_tmp[l] <- splice[1]
+    vec_word_tmp[l+1] <- splice[2]
+    transposes <- c(transposes, paste(vec_word_tmp, collapse = ""))
+  }
+  
+  replaces <- c()
+  for (l in seq(1:nchar(word)))
+    for (k in seq(1:nchar(letters)))
+      replaces <- c(replaces, paste0(substr(word, start = 0, stop = l-1), substr(letters, start = k, stop = k), substr(word, start = l+1, stop = nchar(word))))
+  
+  inserts <- c()
+  for (l in seq(1:(nchar(word)+1)))
+    for (k in seq(1:nchar(letters)))
+      inserts <- c(inserts, paste0(substr(word, start = 0, stop = l-1), substr(letters, start = k, stop = k), substr(word, start = l, stop = nchar(word))))
+  
+  edits1_list <- unique(c(deletes, transposes, replaces, inserts))
+  
+  return (edits1_list)
+}
+
+edits2 <- function(words) {
+  edits2_list <- c()
+  for (i in seq(1:length(words)))
+    edits2_list <- c(edits2_list, edits1(words[i]))
+  
+  return (edits2_list)
+}
+
+known <- function(words) { 
+  return (unique(intersect(words,data$V1)))
+}
+
+demo <- function(word) {
+  demo_list <- known(edits1(word))
+  known(edits2(demo_list))
+}
+
+colum <- demo('colum')
+heirarchy <- demo('heriarchy')
+knowlege <- demo('knowlege')
+adres <- demo('adres')
+
+length(colum)
+head(colum)
+
+length(heirarchy)
+head(heirarchy)
+
+length(knowlege)
+head(knowlege)
+
+length(adres)
+head(adres)
+```
+
+### c. Create a function that provides the top three suggestions for each word. Demonstrate this function on colum, heirarchy, knowlege and adres.
+
+```{r}
+top3 <- function(words) {
+  top_df <- data.frame(words)
+  colnames(top_df) <- c("V1")
+  top_df <- merge(top_df, data, by = "V1")
+  top_df <- top_df[order(-top_df$V3),]
+  
+  return (unique(top_df[0:3,]))
+}
+
+top3(colum)
+top3(heirarchy)
+top3(knowlege)
+top3(adres)
+
+```
+
+### d. List three ways you could improve this spelling corrector.
+
+#### Improvement 1
+
+3 of the 4 tested misspellings had the correct word in the first permutation series; colum, knowlege, and adress. The fourth required a second permutation. I chose to run each word from the first series back through the mutator giving a larger variation and it worked, all 4 words had the correct word in the list created. This list was long however, and full of words in the "known" list despite not being "real" words. Data cleaning might alleviate this.
+
+#### Improvement 2
+
+The second problem is not so obvious. While the second permutation did have all 4 correct spellings, one of the 4 words added words that were more likely candidates than in the first series; colum. This led to "could" being the top word instead of "column" as was chosen during the first series. I dont see a solution to this as assuming the first series is correct in certain cirumstances wouldn't work. Other methods might be required such as weighting the value of the placement of a character in the word. Adist could probably help this but I didnt discover it until it was too late. 
+
+#### Improvement 3
+
+Adres was my bane. At no point could I see a means of making "address" the top choice for the correct spelling of "adres". Perhaps analysis of words preceeding or succeeding in a given text could help make the decision?

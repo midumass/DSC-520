@@ -1,0 +1,53 @@
+---
+title: "Assignment_10.3_HillZach"
+author: "Zach Hill"
+date: "May 20, 2019"
+output: pdf_document
+---
+```{r setup, warning=FALSE, echo=FALSE, results='hide', message=FALSE}
+library(farff)
+library(readr)
+library(MASS)
+library(caret)
+library(ROCR)
+library(dplyr)
+
+input_file <- './binary-classifier-data.csv'
+
+data <- read_csv(input_file)
+attach(data)
+```
+
+## Fitting the Model
+
+```{r}
+glm_data <- glm(formula = label ~ x + y, data = data, family = binomial)
+
+glm_data
+summary(glm_data)
+```
+
+## A: Accuracy using caret
+
+```{r}
+train(as.factor(label) ~ x + y, data=data, trControl = trainControl(method = "cv"), method = "svmRadial")
+```
+
+## B: Comparison to KNN
+
+The model's accuracy is similar (but higher) to what we saw with KNN, according to caret's train function as shown above. This was not the case below when attempting to use probability to predict a label. I'm unsure where my mistake is being made.
+
+```{r}
+data$model_prob <- predict(glm_data, data, type="response")
+
+data_ratio <- sum(data$label == 1) / nrow(data)
+
+data <- data %>% mutate(model_pred = 1*(model_prob > .48) + 0)
+data <- data %>% mutate(accurate = 1*(model_pred == label))
+
+sum(data$accurate)/nrow(data)
+```
+
+## C: Describing a difference
+
+It could be that knn works better on a more linearly separable dataset where SVM (as was used in the train function above) is not as concerned with a linear relationship. These data might have had less linear correlation than would be required for a better fit from knn. This is just speculation as I could not reproduce the results manually.

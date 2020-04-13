@@ -1,0 +1,57 @@
+---
+title: "Assignment_10.1_HillZach"
+author: "Zach Hill"
+date: "May 13, 2019"
+output: pdf_document
+---
+```{r setup, warning=FALSE, echo=FALSE, results='hide', message=FALSE}
+library(farff)
+library(readr)
+library(MASS)
+library(caret)
+
+input_file <- './ThoraricSurgery.arff'
+
+data <- readARFF(input_file)
+attach(data)
+
+str(data)
+```
+
+## A: Fitting a binary logistic regression model
+
+```{r}
+# summary(data)
+
+#glm.RA <- glm(Risk1Yr ~ AGE + DGN + PRE4 + PRE5 + PRE6 + PRE7 + PRE8 + PRE9 + PRE10 + PRE11 + PRE14 + PRE17 + PRE19 + PRE25 + PRE30 + PRE32 , family = binomial)
+
+glm.RA <- glm(Risk1Yr ~ ., data = data, family = binomial)
+
+glm.RA
+
+summary(glm.RA)
+```
+
+## B: Most Valuable Variables
+
+It appears that the diagnosis (and from the host site, that would be the classification given to the typee of cancer) had the largest effect, but this variable is not actually a cause of cancer. Of the variables which should be relevant to the likelihood of survival, PRE9 appears to hold the most significance based on its' standardized coefficients. This is the presence of dyspnoea. Original tumor size is also highly relevant, as is smoking.
+
+## C: Model Accuracy
+```{r}
+stepAIC(glm.RA)
+```
+
+I used the Stepwise AIC function to find the best fit model. AIC is the Akaike information criterion, m etric assigned to each model relative to other models. The function uses a stepwise process to find the model with the best AIC. 
+
+```{r warning=FALSE} 
+glm.FIT <- glm(formula = Risk1Yr ~ DGN + PRE5 + PRE9 + PRE11 + PRE14 + PRE17 + PRE30, family = binomial, data = data)
+
+summary(glm.FIT)
+
+train(Risk1Yr~.,data=data ,trControl = trainControl(method = "cv"), method = "svmRadial")
+# predict(glm.FIT, data, type = "response")
+
+```
+
+The model appears to offer around 85% accuracy.
+

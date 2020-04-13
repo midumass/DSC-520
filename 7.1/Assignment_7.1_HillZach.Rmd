@@ -1,0 +1,151 @@
+---
+title: "Assignment_7.1_HillZach"
+author: "Zach Hill"
+date: "April 28, 2019"
+output: html_document
+---
+
+```{r setup, warning=FALSE, echo=FALSE, results='hide'}
+library(ggplot2)
+library(knitr)
+library(readxl)
+library(QuantPsyc)
+library(dplyr)
+library(car)
+
+input_file <- './week-7-housing.xlsx'
+
+housing <- read_excel(input_file)
+colnames(housing)[colnames(housing)=='Sale Price'] <- 'sale_price'
+```
+
+#### a. Explain why you choose to remove data points from your ‘clean’ dataset.
+
+In last week's assignment we opted not to remove the outliers as they contained all appropriate data and we felt the outliers were important to include. Arguably this approach could be faulty as it is possible some large chunk of land was sold with a tiny trailer on it, or a very small peice of land in an extremely expensive area was sold at a very high price. With the box plots showing numerous outliers like this though, leaving them in seemed to be a better idea.
+
+#### b. Create two variables; one that will contain the variables Sale Price and Square Foot of Lot (same variables used from previous assignment on simple regression) and one that will contain Sale Price, Bedrooms, and Bath Full Count as predictors.  
+
+```{r}
+sale_sfl <- lm(sale_price ~ sq_ft_lot, data = housing)
+sale_bb <- lm(sale_price ~ sq_ft_lot + bedrooms + bath_full_count, data = housing)
+```
+
+#### c. Execute a summary() function on two variables defined in the previous step to compare the model results. What are the R2 and Adjusted R2 statistics?  Explain what these results tell you about the overall model. Did the inclusion of the additional predictors help explain any large variations found in Sale Price?
+
+```{r}
+summary(sale_sfl)
+summary(sale_bb)
+```
+For the first model, R^2 and Adjusted R^2 are `r round(summary(sale_sfl)$r.squared, 4)` and `r round(summary(sale_sfl)$adj.r.squared, 4)` respectively. Since both values are so low, it shows there is little correlation between the lot square footage and the sale price. Additionally since both values are very close to one another, we can assume the model is generalized well.
+
+For the second model, R^2 and Adjusted R^2 are `r round(summary(sale_bb)$r.squared, 4)` and `r round(summary(sale_bb)$adj.r.squared, 4)` respectively. With the addition of the two predictors, the drastically increased R^2 values indicate the square foot of the lot had much less correlation than the other two controlled variables. It seems bedrooms and bathrooms combined are almost 7x better predictors than the previous model. Again, with the two values so close to one another, cross-validity of the models is very good.
+
+#### d. Considering the parameters of the multiple regression model you have created. What are the standardized betas for each parameter and what do the values indicate?
+
+```{r}
+lm.beta(sale_sfl)
+lm.beta(sale_bb)
+```
+This measurement is based on standard deviations, leaving measurement units out of the equation which should provide a better means of analysis for each predictor since they are comparable. In our case it shows the most significant predictor to be the number of full baths.
+
+#### e. Calculate the confidence intervals for the parameters in your model and explain what the results indicate.
+
+```{r}
+confint(sale_sfl)
+confint(sale_bb)
+```
+All three variables have relatively narrow confidence intervals meaning they all should closely represent the population as a whole. 
+
+#### f. Assess the improvement of the new model compared to your original model (simple regression model) by testing whether this change is significant by performing an analysis of variance.
+
+```{r}
+anova(sale_sfl, sale_bb)
+```
+Analysis shows the second model is a much better fit than the first.
+
+#### g. Perform casewise diagnostics to identify outliers and/or influential cases, storing each functions output in a dataframe assigned to a unique variable name.
+
+##### Outliers
+```{r}
+housing$resid <- resid(sale_bb)
+housing$rstandard <- rstandard(sale_bb)
+housing$rstudent <- rstudent(sale_bb)
+housing$cooks <- cooks.distance(sale_bb)
+housing$dfbeta <- dfbeta(sale_bb)
+housing$dffits <- dffits(sale_bb)
+housing$hatvalues <- hatvalues(sale_bb)
+housing$covratio <- covratio(sale_bb)
+
+# mutate(housing, resid = resid(sale_bb))
+# mutate(housing, rstandard = rstandard(sale_bb))
+# mutate(housing, rstudent = rstudent(sale_bb))
+# mutate(housing, cooks = cooks.distance(sale_bb))
+# mutate(housing, dfbeta = dfbeta(sale_bb))
+# mutate(housing, dffits = dffits(sale_bb))
+# mutate(housing, hatvalues = hatvalues(sale_bb))
+# mutate(housing, covratio = covratio(sale_bb))
+```
+
+For some reason dfbeta produced errors in mutate but not when assigning directly to a variable. To keep things uniform, direct assignment was done for all variables.
+
+#### h. Calculate the standardized residuals using the appropriate command, specifying those that are +-2, storing the results of large residuals in a variable you create.
+
+```{r}
+housing$rstandard.large <- housing$rstandard > 2 | housing$rstandard < -2
+```
+
+#### i. Use the appropriate function to show the sum of large residuals.
+
+```{r}
+sum(housing$rstandard.large)
+```
+
+#### j. Which specific variables have large residuals (only cases that evaluate as TRUE)?
+
+```{r}
+housing[housing$rstandard.large,c("sale_price", "sq_ft_lot", "bedrooms", "bath_full_count", "rstandard")]
+```
+
+#### k. Investigate further by calculating the leverage, cooks distance, and covariance rations. Comment on all cases that are problematics.
+
+```{r}
+housing[housing$rstandard.large,c("cooks", "hatvalues", "covratio")]
+summary(housing$cooks > 1)
+leverage.mean <- mean(housing$hatvalues[housing$rstandard.large == TRUE])
+summary(housing$hatvalues > 2 * leverage.mean)
+summary(housing$hatvalues > 3 * leverage.mean)
+cvr_top <- 1+(3*(3+1)/12865)
+cvr_bottom <- 1-(3*(3+1)/12865)
+summary(housing$covratio > cvr_top|housing$covratio < cvr_bottom)
+summary(housing$covratio > cvr_top)
+summary(housing$covratio < cvr_bottom)
+```
+I have found one instance where Cook's Distance is greater than 1, which likely does have undue influence on the model. There are 65 cases where the leverage value is double the mean or larger, and 33 of those instances are three times larger or more. Many of these are outliers. Covariance ratios showed 673 outliers outside 3 times the boundaries; 421 great and 252 below.  
+
+#### l. Perform the necessary calculations to assess the assumption of independence and state if the condition is met or not.
+
+```{r}
+durbinWatsonTest(sale_bb)
+```
+The condition is NOT met. The DW Statistic is well below one.
+
+#### m. Perform the necessary calculations to assess the assumption of no multicollinearity and state if the condition is met or not.
+
+```{r warning = FALSE}
+vif(sale_bb)
+1/vif(sale_bb)
+mean(vif(sale_bb))
+```
+The largest VIF is not greater than 10. The mean VIF is not much greater than 1 so the regression is not biased. No tolerances are below .2. The only cause for concern is the warnings about 2 potential hatvalue errors.
+
+#### n. Visually check the assumptions related to the residuals using the plot() and hist() functions. Summarize what each graph is informing you of and if any anomalies are present.
+
+```{r}
+hist(housing$resid)
+plot(housing$resid)
+```
+The overwhelming majority of residuals lie close to the mean, with mnost of those being slightly below the mean. There are a few identifiable outliers on the histogram but the scatterplot shows far more.
+
+#### o. Overall, is this regression model unbiased?  If an unbiased regression model, what does this tell us about the sample vs. the entire population model?
+
+This regression model appears to be unbiased, even with outliers present. Further cleaning is required. It should be representative of the population model.

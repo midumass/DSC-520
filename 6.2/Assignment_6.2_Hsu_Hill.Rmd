@@ -1,0 +1,84 @@
+---
+title: "Assignment_6.2_Hsu_Hill"
+author: "Zach Hill and Alan Hsu"
+date: "April 19, 2019"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup}
+library(ggplot2)
+library(knitr)
+library(readxl)
+library(gridExtra)
+library(ppcor)
+```
+
+```{r import, warning=FALSE, echo=FALSE, results='hide'}
+housing <- read_excel('./week-6-housing.xlsx')
+colnames(housing)[colnames(housing)=='Sale Price'] <- 'sale_price'
+sale <- housing$sale_price
+sqft <- housing$sq_ft_lot
+sqfttl <- housing$square_feet_total_living
+beds <- housing$bedrooms
+```
+
+```{r a, collapse = TRUE}
+summary(sale)
+summary(sqft)
+```
+
+```{r a2, collapse = TRUE}
+sum(is.na(sale))
+sum(is.na(sqft))
+sum(is.na(sqfttl))
+sum(is.na(beds))
+```
+No NAs in either variable, that helps with cleaning. 
+```{r b, collapse = TRUE}
+lm(sq_ft_lot ~ sale_price, data = housing)
+```
+
+```{r b2} 
+ggplot(housing, aes(sq_ft_lot, sale_price)) + 
+  geom_jitter() +
+  geom_smooth(method = 'lm', se = FALSE)
+
+```
+
+```{r c}
+cov(sale, sqft, use="complete.obs", method = "pearson")
+```
+This should show that as the square footage of the lot increases the price increases by an amount defined by the function but this number seems very very wrong. It appears as though square feet of the lot has little effect on sales price. 
+```{r d}
+```
+Weak correlation but positive between the two variables should be evident. Spearman is used because the plot gives the impression that the relationship is not very linear.
+```{r e}
+cor(sale, sqft, use="complete.obs", method = "spearman")
+```
+Same result, wondering how to form a matrix with just two variables...
+```{r fg}
+cor(sale, sqft, use="complete.obs", method = "spearman")^2
+```
+There is little relationship between the two and they appear to be non-linear as given by the low coefficient of determination.
+```{r h, fig.width=10}
+sale_hist <- ggplot(housing, aes(sale_price)) +
+  geom_histogram(binwidth = 10000)
+sqft_hist <- ggplot(housing, aes(sq_ft_lot)) +
+  geom_histogram(binwidth = 15000)
+
+grid.arrange(sale_hist,sqft_hist,ncol = 2)
+```
+Non-normal distributions with heavy right skewing. 
+```{r i, warning = FALSE}
+pcor(c('sale_price', 'sq_ft_lot', 'bedrooms', 'square_feet_total_living'), var(housing))
+```
+
+```{r jkl, message = FALSE}
+lm(sale ~ sqft)
+summary(lm(sale ~ sqft))
+```
+```{r mn}
+
+```
