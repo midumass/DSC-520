@@ -23,11 +23,11 @@ library(gridExtra)
 library(kableExtra)
 
 # This is the setup for Zach's directory
-# input_file <- './week-6-housing.xlsx'
+input_file <- './week-6-housing.xlsx'
 
 # This is the setup for Alan's directory
-setwd("~\\GitHub\\School\\DSC-520")
-input_file <- "Data\\week-6-housing.xlsx" # Alan setup
+#setwd("~\\GitHub\\School\\DSC-520")
+#input_file <- "Data\\week-6-housing.xlsx" # Alan setup
 
 housing_data <- read_excel(input_file)
 ```

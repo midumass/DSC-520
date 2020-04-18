@@ -1,0 +1,393 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Assignment\_11.2\_HillZach},
+            pdfauthor={Zach Hill},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Assignment\_11.2\_HillZach}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Zach Hill}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{May 26, 2019}
+
+
+\begin{document}
+\maketitle
+
+\hypertarget{a.-load-the-word-frequency-data-into-a-dataset.-the-initial-dataset-should-have-two-variables-the-word-and-the-number-of-occurrences-of-that-word.-create-a-third-variable-for-word-probability-that-provides-the-overall-probability-of-that-word-occurring-in-the-dataset.}{%
+\subsubsection{a. Load the word frequency data into a dataset. The
+initial dataset should have two variables, the word and the number of
+occurrences of that word. Create a third variable for word probability
+that provides the overall probability of that word occurring in the
+dataset.}\label{a.-load-the-word-frequency-data-into-a-dataset.-the-initial-dataset-should-have-two-variables-the-word-and-the-number-of-occurrences-of-that-word.-create-a-third-variable-for-word-probability-that-provides-the-overall-probability-of-that-word-occurring-in-the-dataset.}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{input_file <-}\StringTok{ './en_full.txt'}
+\NormalTok{data <-}\StringTok{ }\KeywordTok{read.table}\NormalTok{(input_file, }\DataTypeTok{sep =} \StringTok{" "}\NormalTok{)}
+\NormalTok{data <-}\StringTok{ }\NormalTok{data }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{V3 =}\NormalTok{ V2 }\OperatorTok{/}\StringTok{ }\KeywordTok{sum}\NormalTok{(V2))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{b.-create-a-function-that-when-given-an-input-word-returns-a-list-of-candidates-that-are-within-two-edits-from-the-input-word.-the-returned-candidates-should-be-within-the-known-word-list.-use-norvigas-python-implementation-how-to-write-a-spelling-corrector-for-reference.-demonstrate-this-function-on-colum-heirarchy-knowlege-and-adres.}{%
+\subsubsection{b. Create a function that when given an input word,
+returns a list of candidates that are within two edits from the input
+word. The returned candidates should be within the known word list. Use
+Norvigâs Python implementation, How to Write a Spelling Corrector, for
+reference. Demonstrate this function on colum, heirarchy, knowlege, and
+adres.}\label{b.-create-a-function-that-when-given-an-input-word-returns-a-list-of-candidates-that-are-within-two-edits-from-the-input-word.-the-returned-candidates-should-be-within-the-known-word-list.-use-norvigas-python-implementation-how-to-write-a-spelling-corrector-for-reference.-demonstrate-this-function-on-colum-heirarchy-knowlege-and-adres.}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{letters <-}\StringTok{ 'abcdefghijklmnopqrstuvwxyz'}
+
+\NormalTok{edits1 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(word) \{}
+  
+\NormalTok{  deletes <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{ (l }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nchar}\NormalTok{(word)))}
+\NormalTok{    deletes <-}\StringTok{ }\KeywordTok{c}\NormalTok{(deletes, }\KeywordTok{paste0}\NormalTok{(}\KeywordTok{substr}\NormalTok{(word, }\DataTypeTok{start =} \DecValTok{0}\NormalTok{, }\DataTypeTok{stop =}\NormalTok{ l}\DecValTok{-1}\NormalTok{), }\KeywordTok{substr}\NormalTok{(word, }\DataTypeTok{start =}\NormalTok{ l}\OperatorTok{+}\DecValTok{1}\NormalTok{, }\DataTypeTok{stop =} \KeywordTok{nchar}\NormalTok{(word))))}
+  
+\NormalTok{  transposes <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+\NormalTok{  vec_word <-}\StringTok{ }\KeywordTok{strsplit}\NormalTok{(word, }\DataTypeTok{split =} \StringTok{''}\NormalTok{)[[}\DecValTok{1}\NormalTok{]]}
+  \ControlFlowTok{for}\NormalTok{ (l }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{(}\KeywordTok{nchar}\NormalTok{(word)}\OperatorTok{-}\DecValTok{1}\NormalTok{))) \{}
+\NormalTok{    vec_word_tmp <-}\StringTok{ }\NormalTok{vec_word}
+\NormalTok{    splice <-}\StringTok{ }\KeywordTok{rev}\NormalTok{(vec_word_tmp[l}\OperatorTok{:}\NormalTok{(l}\OperatorTok{+}\DecValTok{1}\NormalTok{)])}
+\NormalTok{    vec_word_tmp[l] <-}\StringTok{ }\NormalTok{splice[}\DecValTok{1}\NormalTok{]}
+\NormalTok{    vec_word_tmp[l}\OperatorTok{+}\DecValTok{1}\NormalTok{] <-}\StringTok{ }\NormalTok{splice[}\DecValTok{2}\NormalTok{]}
+\NormalTok{    transposes <-}\StringTok{ }\KeywordTok{c}\NormalTok{(transposes, }\KeywordTok{paste}\NormalTok{(vec_word_tmp, }\DataTypeTok{collapse =} \StringTok{""}\NormalTok{))}
+\NormalTok{  \}}
+  
+\NormalTok{  replaces <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{ (l }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nchar}\NormalTok{(word)))}
+    \ControlFlowTok{for}\NormalTok{ (k }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nchar}\NormalTok{(letters)))}
+\NormalTok{      replaces <-}\StringTok{ }\KeywordTok{c}\NormalTok{(replaces, }\KeywordTok{paste0}\NormalTok{(}\KeywordTok{substr}\NormalTok{(word, }\DataTypeTok{start =} \DecValTok{0}\NormalTok{, }\DataTypeTok{stop =}\NormalTok{ l}\DecValTok{-1}\NormalTok{), }\KeywordTok{substr}\NormalTok{(letters, }\DataTypeTok{start =}\NormalTok{ k, }\DataTypeTok{stop =}\NormalTok{ k), }\KeywordTok{substr}\NormalTok{(word, }\DataTypeTok{start =}\NormalTok{ l}\OperatorTok{+}\DecValTok{1}\NormalTok{, }\DataTypeTok{stop =} \KeywordTok{nchar}\NormalTok{(word))))}
+  
+\NormalTok{  inserts <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{ (l }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{(}\KeywordTok{nchar}\NormalTok{(word)}\OperatorTok{+}\DecValTok{1}\NormalTok{)))}
+    \ControlFlowTok{for}\NormalTok{ (k }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nchar}\NormalTok{(letters)))}
+\NormalTok{      inserts <-}\StringTok{ }\KeywordTok{c}\NormalTok{(inserts, }\KeywordTok{paste0}\NormalTok{(}\KeywordTok{substr}\NormalTok{(word, }\DataTypeTok{start =} \DecValTok{0}\NormalTok{, }\DataTypeTok{stop =}\NormalTok{ l}\DecValTok{-1}\NormalTok{), }\KeywordTok{substr}\NormalTok{(letters, }\DataTypeTok{start =}\NormalTok{ k, }\DataTypeTok{stop =}\NormalTok{ k), }\KeywordTok{substr}\NormalTok{(word, }\DataTypeTok{start =}\NormalTok{ l, }\DataTypeTok{stop =} \KeywordTok{nchar}\NormalTok{(word))))}
+  
+\NormalTok{  edits1_list <-}\StringTok{ }\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(deletes, transposes, replaces, inserts))}
+  
+  \KeywordTok{return}\NormalTok{ (edits1_list)}
+\NormalTok{\}}
+
+\NormalTok{edits2 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(words) \{}
+\NormalTok{  edits2_list <-}\StringTok{ }\KeywordTok{c}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \KeywordTok{seq}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{length}\NormalTok{(words)))}
+\NormalTok{    edits2_list <-}\StringTok{ }\KeywordTok{c}\NormalTok{(edits2_list, }\KeywordTok{edits1}\NormalTok{(words[i]))}
+  
+  \KeywordTok{return}\NormalTok{ (edits2_list)}
+\NormalTok{\}}
+
+\NormalTok{known <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(words) \{ }
+  \KeywordTok{return}\NormalTok{ (}\KeywordTok{unique}\NormalTok{(}\KeywordTok{intersect}\NormalTok{(words,data}\OperatorTok{$}\NormalTok{V1)))}
+\NormalTok{\}}
+
+\NormalTok{demo <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(word) \{}
+\NormalTok{  demo_list <-}\StringTok{ }\KeywordTok{known}\NormalTok{(}\KeywordTok{edits1}\NormalTok{(word))}
+  \KeywordTok{known}\NormalTok{(}\KeywordTok{edits2}\NormalTok{(demo_list))}
+\NormalTok{\}}
+
+\NormalTok{colum <-}\StringTok{ }\KeywordTok{demo}\NormalTok{(}\StringTok{'colum'}\NormalTok{)}
+\NormalTok{heirarchy <-}\StringTok{ }\KeywordTok{demo}\NormalTok{(}\StringTok{'heriarchy'}\NormalTok{)}
+\NormalTok{knowlege <-}\StringTok{ }\KeywordTok{demo}\NormalTok{(}\StringTok{'knowlege'}\NormalTok{)}
+\NormalTok{adres <-}\StringTok{ }\KeywordTok{demo}\NormalTok{(}\StringTok{'adres'}\NormalTok{)}
+
+\KeywordTok{length}\NormalTok{(colum)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 297
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(colum)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "lum"  "oum"  "olm"  "olu"  "loum" "alum"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{length}\NormalTok{(heirarchy)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(heirarchy)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "hierarchy" "heirarchy" "heirarchs"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{length}\NormalTok{(knowlege)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 21
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(knowlege)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "knowlege"  "knowlige"  "knowledge" "knowlesge" "knowlegde" "knoledge"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{length}\NormalTok{(adres)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 692
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(adres)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "res"  "des"  "drs"  "dre"  "rdes" "ders"
+\end{verbatim}
+
+\hypertarget{c.-create-a-function-that-provides-the-top-three-suggestions-for-each-word.-demonstrate-this-function-on-colum-heirarchy-knowlege-and-adres.}{%
+\subsubsection{c. Create a function that provides the top three
+suggestions for each word. Demonstrate this function on colum,
+heirarchy, knowlege and
+adres.}\label{c.-create-a-function-that-provides-the-top-three-suggestions-for-each-word.-demonstrate-this-function-on-colum-heirarchy-knowlege-and-adres.}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{top3 <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(words) \{}
+\NormalTok{  top_df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(words)}
+  \KeywordTok{colnames}\NormalTok{(top_df) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"V1"}\NormalTok{)}
+\NormalTok{  top_df <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(top_df, data, }\DataTypeTok{by =} \StringTok{"V1"}\NormalTok{)}
+\NormalTok{  top_df <-}\StringTok{ }\NormalTok{top_df[}\KeywordTok{order}\NormalTok{(}\OperatorTok{-}\NormalTok{top_df}\OperatorTok{$}\NormalTok{V3),]}
+  
+  \KeywordTok{return}\NormalTok{ (}\KeywordTok{unique}\NormalTok{(top_df[}\DecValTok{0}\OperatorTok{:}\DecValTok{3}\NormalTok{,]))}
+\NormalTok{\}}
+
+\KeywordTok{top3}\NormalTok{(colum)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        V1     V2           V3
+## 164 could 857107 0.0016028128
+## 73   cold  78266 0.0001463595
+## 14   calm  67229 0.0001257200
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{top3}\NormalTok{(heirarchy)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          V1  V2           V3
+## 3 hierarchy 762 1.424960e-06
+## 2 heirarchy   2 3.740053e-09
+## 1 heirarchs   1 1.870027e-09
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{top3}\NormalTok{(knowlege)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            V1    V2           V3
+## 12  knowledge 17865 3.340802e-05
+## 14 knowledges    11 2.057029e-08
+## 18   knowlege     5 9.350133e-09
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{top3}\NormalTok{(adres)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       V1      V2           V3
+## 275  are 3290764 0.0061538159
+## 470 does  370612 0.0006930543
+## 289 aren  139236 0.0002603750
+\end{verbatim}
+
+\hypertarget{d.-list-three-ways-you-could-improve-this-spelling-corrector.}{%
+\subsubsection{d. List three ways you could improve this spelling
+corrector.}\label{d.-list-three-ways-you-could-improve-this-spelling-corrector.}}
+
+\hypertarget{improvement-1}{%
+\paragraph{Improvement 1}\label{improvement-1}}
+
+3 of the 4 tested misspellings had the correct word in the first
+permutation series; colum, knowlege, and adress. The fourth required a
+second permutation. I chose to run each word from the first series back
+through the mutator giving a larger variation and it worked, all 4 words
+had the correct word in the list created. This list was long however,
+and full of words in the ``known'' list despite not being ``real''
+words. Data cleaning might alleviate this.
+
+\hypertarget{improvement-2}{%
+\paragraph{Improvement 2}\label{improvement-2}}
+
+The second problem is not so obvious. While the second permutation did
+have all 4 correct spellings, one of the 4 words added words that were
+more likely candidates than in the first series; colum. This led to
+``could'' being the top word instead of ``column'' as was chosen during
+the first series. I dont see a solution to this as assuming the first
+series is correct in certain cirumstances wouldn't work. Other methods
+might be required such as weighting the value of the placement of a
+character in the word. Adist could probably help this but I didnt
+discover it until it was too late.
+
+\hypertarget{improvement-3}{%
+\paragraph{Improvement 3}\label{improvement-3}}
+
+Adres was my bane. At no point could I see a means of making ``address''
+the top choice for the correct spelling of ``adres''. Perhaps analysis
+of words preceeding or succeeding in a given text could help make the
+decision?
+
+
+\end{document}

@@ -24,11 +24,11 @@ library(pastecs)
 library(ggm)
 
 # This is the setup for Zach's directory
-# input_file <- './gss-2016.csv'
+input_file <- './gss-2016.csv'
 
 # This is the setup for Alan's directory
-setwd("~\\GitHub\\School\\DSC-520\\")
-input_file <- "Data\\gss-2016.csv"
+#setwd("~\\GitHub\\School\\DSC-520\\")
+#input_file <- "Data\\gss-2016.csv"
 
 survey_data <- read_csv(input_file)
 ```
